@@ -1,0 +1,99 @@
+From e2a332e5df1783580c42f62eb7f4bef04d8000b2 Mon Sep 17 00:00:00 2001
+From: Victor Zverovich <victor.zverovich@gmail.com>
+Date: Thu, 19 May 2016 15:04:25 -0700
+Subject: [PATCH] Use a mock to test locale support
+
+---
+ test/format-test.cc     | 29 ++++++++++++++++++++++-------
+ test/gtest-extra.h      |  8 +++++++-
+ test/posix-mock-test.cc |  6 ------
+ 3 files changed, 29 insertions(+), 14 deletions(-)
+
+diff --git a/test/format-test.cc b/test/format-test.cc
+index 31f9d57..4a0e85c 100644
+--- a/test/format-test.cc
++++ b/test/format-test.cc
+@@ -43,6 +43,22 @@
+ // Test that the library compiles if None is defined to 0 as done by xlib.h.
+ #define None 0
+ 
++struct LocaleMock {
++  static LocaleMock *instance;
++
++  MOCK_METHOD0(localeconv, lconv *());
++} *LocaleMock::instance;
++
++namespace fmt {
++namespace std {
++using namespace ::std;
++lconv *localeconv() {
++  return LocaleMock::instance ?
++        LocaleMock::instance->localeconv() : ::std::localeconv();
++}
++}
++}
++
+ #include "fmt/format.h"
+ #include "fmt/time.h"
+ 
+@@ -1209,13 +1225,12 @@ TEST(FormatterTest, FormatOct) {
+ }
+ 
+ TEST(FormatterTest, FormatIntLocale) {
+-#ifndef _WIN32
+-  const char *locale = "en_US.utf-8";
+-#else
+-  const char *locale = "English_United States";
+-#endif
+-  std::setlocale(LC_ALL, locale);
+-  EXPECT_EQ("1,234,567", format("{:n}", 1234567));
++  ScopedMock<LocaleMock> mock;
++  lconv lc = {};
++  char sep[] = "--";
++  lc.thousands_sep = sep;
++  EXPECT_CALL(mock, localeconv()).WillOnce(testing::Return(&lc));
++  EXPECT_EQ("1--234--567", format("{:n}", 1234567));
+ }
+ 
+ TEST(FormatterTest, FormatFloat) {
+diff --git a/test/gtest-extra.h b/test/gtest-extra.h
+index 649fbe2..5f7fe29 100644
+--- a/test/gtest-extra.h
++++ b/test/gtest-extra.h
+@@ -29,7 +29,7 @@
+ #define FMT_GTEST_EXTRA_H_
+ 
+ #include <string>
+-#include <gtest/gtest.h>
++#include <gmock/gmock.h>
+ 
+ #include "fmt/format.h"
+ 
+@@ -172,4 +172,10 @@ std::string read(fmt::File &f, std::size_t count);
+ 
+ #endif  // FMT_USE_FILE_DESCRIPTORS
+ 
++template <typename Mock>
++struct ScopedMock : testing::StrictMock<Mock> {
++  ScopedMock() { Mock::instance = this; }
++  ~ScopedMock() { Mock::instance = 0; }
++};
++
+ #endif  // FMT_GTEST_EXTRA_H_
+diff --git a/test/posix-mock-test.cc b/test/posix-mock-test.cc
+index 2a89a82..3eaca21 100644
+--- a/test/posix-mock-test.cc
++++ b/test/posix-mock-test.cc
+@@ -453,12 +453,6 @@ TEST(BufferedFileTest, FilenoNoRetry) {
+   fileno_count = 0;
+ }
+ 
+-template <typename Mock>
+-struct ScopedMock : testing::StrictMock<Mock> {
+-  ScopedMock() { Mock::instance = this; }
+-  ~ScopedMock() { Mock::instance = 0; }
+-};
+-
+ struct TestMock {
+   static TestMock *instance;
+ } *TestMock::instance;
