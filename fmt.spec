@@ -1,17 +1,11 @@
 Name:           fmt
-Version:        3.0.0
-Release:        2%{?dist}
+Version:        3.0.1
+Release:        1%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
 Source0:        https://github.com/fmtlib/fmt/releases/download/%{version}/%{name}-%{version}.zip
-# See https://github.com/fmtlib/fmt/issues/325
-Patch0:         fmt_gmock_crash.patch
-# See https://github.com/fmtlib/fmt/issues/329
-Patch1:         fmt_mock_locale.patch
-# See https://github.com/fmtlib/fmt/issues/398
-Patch2:         fmt_char_width.patch
 
 %if 0%{?rhel}
 BuildRequires:  cmake3
@@ -109,6 +103,9 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Nov 25 2016 Dave Johansen <davejohansen@gmail.com> - 3.0.1-1
+- Upstream release
+
 * Tue Nov 15 2016 Dave Johansen <davejohansen@gmail.com> - 3.0.0-2
 - Fix expected unqualified-id before numeric constant error
 
