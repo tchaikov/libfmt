@@ -1,17 +1,23 @@
 Name:           fmt
 Version:        3.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
-Source0:        https://github.com/fmtlib/fmt/releases/download/%{version}/%{name}-%{version}.zip
+Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 
 %if 0%{?rhel}
 BuildRequires:  cmake3
 %else
 BuildRequires:  cmake
 %endif
+# For building documentation
+BuildRequires:  doxygen
+BuildRequires:  git
+BuildRequires:  nodejs-less
+BuildRequires:  python2-pip
+BuildRequires:  python2-virtualenv
 
 %description
 C++ Format is an open-source formatting library for C++. It can be used as a
@@ -69,7 +75,11 @@ cmakeopts="$cmakeopts -DCMAKE_SKIP_RPATH=OFF"
 %cmake \
 %endif
  $cmakeopts ..
-make %{?_smp_mflags} all
+# Remove --clean-css since that plugin isn't available
+sed -i "s/'--clean-css',//" ../doc/build.py
+make %{?_smp_mflags} all doc
+# Remove temporary build products
+rm -rf ../build/doc/html/{.buildinfo,.doctrees}
 
 %install
 make -C build install DESTDIR=%{buildroot}
@@ -95,7 +105,7 @@ make -C build test
 %{_includedir}/fmt/time.h
 
 %files doc
-%doc doc/html/
+%doc %{_datadir}/doc/fmt/
 %license doc/python-license.txt
 
 %post -p /sbin/ldconfig
@@ -103,6 +113,9 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Tue Dec 27 2016 Dave Johansen <davejohansen@gmail.com> - 3.0.1-2
+- Build documentation
+
 * Fri Nov 25 2016 Dave Johansen <davejohansen@gmail.com> - 3.0.1-1
 - Upstream release
 
