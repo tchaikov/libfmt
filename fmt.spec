@@ -20,13 +20,13 @@ BuildRequires:  nodejs-less
 BuildRequires:  python2-sphinx
 BuildRequires:  python2-breathe
 
-%description
-C++ Format is an open-source formatting library for C++. It can be used as a
-safe alternative to printf or as a fast alternative to IOStreams.
-
 # This package replaces the old name of cppformat
 Provides:       cppformat = %{version}-%{release}
 Obsoletes:      cppformat < %{version}-%{release}
+
+%description
+C++ Format is an open-source formatting library for C++. It can be used as a
+safe alternative to printf or as a fast alternative to IOStreams.
 
 %package        devel
 Summary:        Development files for %{name}
