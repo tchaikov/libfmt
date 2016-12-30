@@ -6,8 +6,8 @@ Summary:        Small, safe and fast formatting library for C++
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
 Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
-# See https://github.com/fmtlib/fmt/issues/443
-Patch0:         fmt_build_github.patch
+# See https://github.com/fmtlib/fmt/issues/443 and https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/message/LVKYLDLJVWAVJE4MQVKDO6PYZRD5MCP6/
+Patch0:         fmt_build_doc_system.patch
 
 %if 0%{?rhel}
 BuildRequires:  cmake3
@@ -16,10 +16,9 @@ BuildRequires:  cmake
 %endif
 # For building documentation
 BuildRequires:  doxygen
-BuildRequires:  git
 BuildRequires:  nodejs-less
-BuildRequires:  python2-pip
-BuildRequires:  python2-virtualenv
+BuildRequires:  python2-sphinx
+BuildRequires:  python2-breathe
 
 %description
 C++ Format is an open-source formatting library for C++. It can be used as a
