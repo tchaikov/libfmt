@@ -6,6 +6,8 @@ Summary:        Small, safe and fast formatting library for C++
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
 Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
+# See https://github.com/fmtlib/fmt/issues/443
+Patch0:         fmt_build_github.patch
 
 %if 0%{?rhel}
 BuildRequires:  cmake3
