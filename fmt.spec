@@ -1,6 +1,6 @@
 Name:           fmt
 Version:        3.0.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
@@ -114,6 +114,9 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.2-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Sat Jun 24 2017 Dave Johansen <davejohansen@gmail.com> - 3.0.2-1
 - Upstream release
 
