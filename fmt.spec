@@ -1,6 +1,6 @@
 Name:           fmt
 Version:        3.0.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
@@ -8,6 +8,8 @@ URL:            https://github.com/fmtlib/fmt
 Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # See https://github.com/fmtlib/fmt/issues/443 and https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/message/LVKYLDLJVWAVJE4MQVKDO6PYZRD5MCP6/
 Patch0:         fmt_build_doc_system.patch
+# See https://github.com/fmtlib/fmt/issues/551
+Patch1:         fmt_test8_segfault.patch
 
 %if 0%{?rhel}
 BuildRequires:  cmake3
@@ -114,6 +116,9 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Wed Aug 09 2017 Dave Johansen <davejohansen@gmail.com> - 3.0.2-4
+- Patch for Test 8 segfault
+
 * Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
