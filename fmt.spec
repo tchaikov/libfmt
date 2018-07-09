@@ -12,6 +12,8 @@ Patch0:         fmt_build_doc_system.patch
 Patch1:         fmt_test8_segfault.patch
 
 %if 0%{?rhel}
+BuildRequires:  gcc
+BuildRequires:  gcc-c++
 BuildRequires:  cmake3
 %else
 BuildRequires:  cmake
