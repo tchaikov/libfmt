@@ -11,9 +11,9 @@ Patch0:         fmt_build_doc_system.patch
 # See https://github.com/fmtlib/fmt/issues/551
 Patch1:         fmt_test8_segfault.patch
 
-%if 0%{?rhel}
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
+%if 0%{?rhel} && 0%{?rhel} <= 7
 BuildRequires:  cmake3
 %else
 BuildRequires:  cmake
@@ -74,7 +74,7 @@ cmakeopts="-DFMT_LIB_DIR=%{_lib} -DFMT_CMAKE_DIR=%{_datarootdir}/cmake/%{name}"
 %if 0%{?rhel}%{?fedora} == 6
 cmakeopts="$cmakeopts -DCMAKE_SKIP_RPATH=OFF"
 %endif
-%if 0%{?rhel}
+%if 0%{?rhel} && 0%{?rhel} <= 7
 %cmake3 \
 %else
 %cmake \
