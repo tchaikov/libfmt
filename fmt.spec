@@ -1,6 +1,6 @@
 Name:           fmt
 Version:        3.0.2
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
@@ -64,6 +64,8 @@ This package contains documentation for developer documentation for %{name}.
 
 %prep
 %autosetup -p1
+# Fix shebang
+sed -i -e 's~#!/usr/bin/env python~#!%{_bindir}/python2~g' doc/build.py
 
 %build
 mkdir build
@@ -118,6 +120,9 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Fri Aug 31 2018 Leigh Scott <leigh123linux@googlemail.com> - 3.0.2-7
+- Fix python2 issue for doc
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 3.0.2-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
