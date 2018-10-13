@@ -1,15 +1,19 @@
 Name:           fmt
-Version:        3.0.2
-Release:        7%{?dist}
+Version:        5.2.1
+Release:        1%{?dist}
 Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
 Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # See https://github.com/fmtlib/fmt/issues/443 and https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/message/LVKYLDLJVWAVJE4MQVKDO6PYZRD5MCP6/
-Patch0:         fmt_build_doc_system.patch
-# See https://github.com/fmtlib/fmt/issues/551
-Patch1:         fmt_test8_segfault.patch
+Patch1:         doc-build-removed-all-pip-internet-stuff.patch
+Patch3:         doc-build-do-not-create-virtual-environment.patch
+Patch4:         doc-_templates-layout-stripped-Google-Analytics.patch
+Patch5:         doc-_templates-layout-stripped-download-links.patch
+Patch6:         doc-index-removed-GitHub-iframe.patch
+Patch7:         doc-build-use-sphinx-build-3.patch
+Patch8:         doc-build-use-python3.patch
 
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
@@ -21,8 +25,13 @@ BuildRequires:  cmake
 # For building documentation
 BuildRequires:  doxygen
 BuildRequires:  nodejs-less
+%if 0%{?fedora}
+BuildRequires:  python3-sphinx
+BuildRequires:  python3-breathe
+%else
 BuildRequires:  python2-sphinx
 BuildRequires:  python2-breathe
+%endif
 
 # This package replaces the old name of cppformat
 Provides:       cppformat = %{version}-%{release}
@@ -43,13 +52,6 @@ Obsoletes:      cppformat-devel < %{version}-%{release}
 %description    devel
 This package contains the header file for using %{name}.
 
-%package        static
-Summary:        Header only development files for %{name}
-Requires:       %{name}-devel%{?_isa} = %{version}-%{release}
-
-%description    static
-This package contains the files for using %{name} as a header only library.
-
 %package        doc
 Summary:        Documentation files for %{name}
 License:        Python
@@ -64,52 +66,44 @@ This package contains documentation for developer documentation for %{name}.
 
 %prep
 %autosetup -p1
-# Fix shebang
-sed -i -e 's~#!/usr/bin/env python~#!%{_bindir}/python2~g' doc/build.py
 
 %build
 mkdir build
-cd build
-cmakeopts="-DFMT_LIB_DIR=%{_lib} -DFMT_CMAKE_DIR=%{_datarootdir}/cmake/%{name}"
-# NOTE: Specifying CMAKE_SKIP_RPATH=OFF is so it will link properly on RHEL 6
-# See https://bugzilla.redhat.com/show_bug.cgi?id=640672
-%if 0%{?rhel}%{?fedora} == 6
-cmakeopts="$cmakeopts -DCMAKE_SKIP_RPATH=OFF"
-%endif
+pushd build
 %if 0%{?rhel} && 0%{?rhel} <= 7
-%cmake3 \
+%cmake3 ..                                    \
 %else
-%cmake \
+%cmake ..                                     \
 %endif
- $cmakeopts ..
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo         \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON      \
+    -DFMT_CMAKE_DIR=%{_datarootdir}/cmake/%{name} \
+    -DFMT_LIB_DIR=%{_libdir}
+
 # Remove --clean-css since that plugin isn't available
 sed -i "s/'--clean-css',//" ../doc/build.py
-make %{?_smp_mflags} all doc
+%make_build all doc
 # Remove temporary build products
-rm -rf ../build/doc/html/{.buildinfo,.doctrees}
+rm -rf ../build/doc/html/{.buildinfo,.doctrees,objects.inv}
 
 %install
-make -C build install DESTDIR=%{buildroot}
+%make_install -C build
 
 %check
-make -C build test
+pushd build
+ctest -VV %{?_smp_mflags}
+popd
 
 %files
 %{_libdir}/libfmt.so.*
 %{!?_licensedir:%global license %%doc}
 %license LICENSE.rst
+%doc ChangeLog.rst README.rst
 
 %files devel
 %{_includedir}/fmt/
 %{_libdir}/libfmt.so
 %{_datarootdir}/cmake/fmt/
-
-%files static
-%{_includedir}/fmt/format.cc
-%{_includedir}/fmt/ostream.cc
-%{_includedir}/fmt/ostream.h
-%{_includedir}/fmt/posix.h
-%{_includedir}/fmt/time.h
 
 %files doc
 %doc %{_datadir}/doc/fmt/
@@ -120,6 +114,13 @@ make -C build test
 %postun -p /sbin/ldconfig
 
 %changelog
+* Thu Oct 11 2018 Kefu Chai <tchaikov@gmail.com> - 5.2.1-1
+- Update to 5.2.1
+- Build using python3 packages on fedora
+- Remove links in document accessing network
+- Package ChangeLog.rst and README.rst
+- Drop fmt-static package
+
 * Fri Aug 31 2018 Leigh Scott <leigh123linux@googlemail.com> - 3.0.2-7
 - Fix python2 issue for doc
 
