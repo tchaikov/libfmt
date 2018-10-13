@@ -1,0 +1,45 @@
+From f8091ad4f1fc8140dd133fa12e20435583658dbe Mon Sep 17 00:00:00 2001
+From: Kefu Chai <tchaikov@gmail.com>
+Date: Fri, 12 Oct 2018 14:04:04 +0800
+Subject: doc: build: use sphinx-build-3
+
+use sphinx-build-3 as an alternative of sphinx-build.
+---
+ doc/CMakeLists.txt | 5 ++++-
+ doc/build.py       | 3 ++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/doc/CMakeLists.txt b/doc/CMakeLists.txt
+index c16427a..66b4bd1 100644
+--- a/doc/CMakeLists.txt
++++ b/doc/CMakeLists.txt
+@@ -4,8 +4,11 @@ if (NOT DOXYGEN)
+   return ()
+ endif ()
+ 
++find_program(SPHINX_EXECUTABLE
++  NAMES sphinx-build sphinx-build-3)
+ add_custom_target(doc
+-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/build.py ${FMT_VERSION}
++  COMMAND ${CMAKE_COMMAND} -E env SPHINX_EXECUTABLE=${SPHINX_EXECUTABLE}
++    ${CMAKE_CURRENT_SOURCE_DIR}/build.py ${FMT_VERSION}
+   SOURCES api.rst syntax.rst build.py conf.py _templates/layout.html)
+ 
+ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
+diff --git a/doc/build.py b/doc/build.py
+index f745ee0..19093d3 100755
+--- a/doc/build.py
++++ b/doc/build.py
+@@ -47,7 +47,8 @@ def build_docs(version='dev', **kwargs):
+     raise CalledProcessError(p.returncode, cmd)
+   html_dir = os.path.join(work_dir, 'html')
+   main_versions = reversed(versions[-3:])
+-  check_call(['sphinx-build',
++  sphinx_build = os.environ.get('SPHINX_EXECUTABLE', 'sphinx-build')
++  check_call([sphinx_build,
+               '-Dbreathe_projects.format=' + os.path.abspath(doxyxml_dir),
+               '-Dversion=' + version, '-Drelease=' + version,
+               '-Aversion=' + version, '-Aversions=' + ','.join(main_versions),
+-- 
+2.19.1
+

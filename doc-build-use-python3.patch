@@ -1,0 +1,32 @@
+From 21955af0e5a30f0cabbdf128cb27acc1ea6c28c4 Mon Sep 17 00:00:00 2001
+From: Kefu Chai <tchaikov@gmail.com>
+Date: Fri, 12 Oct 2018 18:10:07 +0800
+Subject: doc: build use python3
+
+use python3 as an alternative of python (python2)
+---
+ doc/CMakeLists.txt | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/doc/CMakeLists.txt b/doc/CMakeLists.txt
+index 66b4bd1..87ad9ec 100644
+--- a/doc/CMakeLists.txt
++++ b/doc/CMakeLists.txt
+@@ -4,11 +4,13 @@ if (NOT DOXYGEN)
+   return ()
+ endif ()
+ 
++find_package(PythonInterp
++  QUIET REQUIRED)
+ find_program(SPHINX_EXECUTABLE
+   NAMES sphinx-build sphinx-build-3)
+ add_custom_target(doc
+   COMMAND ${CMAKE_COMMAND} -E env SPHINX_EXECUTABLE=${SPHINX_EXECUTABLE}
+-    ${CMAKE_CURRENT_SOURCE_DIR}/build.py ${FMT_VERSION}
++    ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/build.py ${FMT_VERSION}
+   SOURCES api.rst syntax.rst build.py conf.py _templates/layout.html)
+ 
+ install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
+-- 
+2.19.1
+
