@@ -5,7 +5,7 @@ Summary:        Small, safe and fast formatting library for C++
 
 License:        BSD
 URL:            https://github.com/fmtlib/fmt
-Source0:        https://github.com/fmtlib/fmt/releases/download/%{version}/%{name}-%{version}.zip
+Source0:        https://github.com/fmtlib/fmt/archive/%{version}.tar.gz#/%{name}-%{version}.tar.gz
 # See https://github.com/fmtlib/fmt/issues/443 and https://lists.fedoraproject.org/archives/list/devel@lists.fedoraproject.org/message/LVKYLDLJVWAVJE4MQVKDO6PYZRD5MCP6/
 Patch1:         doc-build-removed-all-pip-internet-stuff.patch
 Patch3:         doc-build-do-not-create-virtual-environment.patch
@@ -77,7 +77,7 @@ pushd build
 %endif
     -DCMAKE_BUILD_TYPE=RelWithDebInfo         \
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON      \
-    -DFMT_CMAKE_DIR=%{_datarootdir}/cmake/%{name} \
+    -DFMT_CMAKE_DIR=%{_datadir}/cmake/%{name} \
     -DFMT_LIB_DIR=%{_libdir}
 
 # Remove --clean-css since that plugin isn't available
@@ -89,13 +89,15 @@ rm -rf ../build/doc/html/{.buildinfo,.doctrees,objects.inv}
 %install
 %make_install -C build
 
+%ldconfig_scriptlets
+
 %check
 pushd build
 ctest -VV %{?_smp_mflags}
 popd
 
 %files
-%{_libdir}/libfmt.so.*
+%{_libdir}/libfmt.so.5*
 %{!?_licensedir:%global license %%doc}
 %license LICENSE.rst
 %doc ChangeLog.rst README.rst
@@ -103,15 +105,11 @@ popd
 %files devel
 %{_includedir}/fmt/
 %{_libdir}/libfmt.so
-%{_datarootdir}/cmake/fmt/
+%{_datadir}/cmake/fmt/
 
 %files doc
 %doc %{_datadir}/doc/fmt/
 %license doc/python-license.txt
-
-%post -p /sbin/ldconfig
-
-%postun -p /sbin/ldconfig
 
 %changelog
 * Thu Oct 11 2018 Kefu Chai <tchaikov@gmail.com> - 5.2.1-1
